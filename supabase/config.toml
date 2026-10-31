@@ -1,0 +1,2 @@
+[functions.report-health]
+verify_jwt = false
