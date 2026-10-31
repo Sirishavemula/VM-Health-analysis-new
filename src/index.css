@@ -288,6 +288,141 @@ select:focus {
   background: var(--color-unhealthy-bg);
 }
 
+.status-online {
+  color: var(--color-healthy);
+  background: var(--color-healthy-bg);
+}
+
+.status-offline,
+.status-muted {
+  color: var(--color-muted);
+  background: #e2e8f0;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  font: inherit;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 12px;
+  margin-bottom: -1px;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover {
+  color: var(--color-text);
+}
+
+.tab-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.page-message {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.page-message .card {
+  max-width: 480px;
+  width: 100%;
+}
+
+.inline-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.inline-form label {
+  flex: 1 1 240px;
+}
+
+.key-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #fcd34d;
+  background: var(--color-warning-bg);
+  border-radius: 8px;
+  color: var(--color-warning-text);
+}
+
+.key-value {
+  display: block;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.key-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.setup-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.setup-list dt {
+  font-weight: 600;
+}
+
+.setup-list dd {
+  margin: 0;
+  color: var(--color-muted);
+  word-break: break-all;
+}
+
+.key-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.key-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.key-row:first-child {
+  border-top: none;
+}
+
+.machines {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .gauge-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

@@ -34,10 +34,13 @@ export default function AuthForm() {
       if (isSignUp) {
         const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
         if (signUpError) {
+          const serviceDown = !signUpError.status || signUpError.status >= 500;
           setError(
-            signUpError.message.toLowerCase().includes('already')
-              ? 'An account with this email already exists. Try signing in.'
-              : 'Could not create your account. Please check your details and try again.',
+            serviceDown
+              ? 'The sign-in service is unavailable right now. Check your connection and try again.'
+              : signUpError.message.toLowerCase().includes('already')
+                ? 'An account with this email already exists. Try signing in.'
+                : 'Could not create your account. Please check your details and try again.',
           );
           return;
         }
@@ -48,11 +51,16 @@ export default function AuthForm() {
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) {
-          setError('Email or password is incorrect.');
+          const serviceDown = !signInError.status || signInError.status >= 500;
+          setError(
+            serviceDown
+              ? 'The sign-in service is unavailable right now. Check your connection and try again.'
+              : 'Email or password is incorrect.',
+          );
         }
       }
     } catch {
-      setError('Network error. Check your connection and try again.');
+      setError('The sign-in service is unavailable right now. Check your connection and try again.');
     } finally {
       setSubmitting(false);
     }

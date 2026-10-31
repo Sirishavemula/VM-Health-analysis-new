@@ -60,24 +60,23 @@ json_string() {
 
 report_to_dashboard() {
   local machine_name="${HEALTH_MACHINE_NAME:-$(cat /proc/sys/kernel/hostname)}"
-  local reasons_json="" reason
-  for reason in ${reasons[@]+"${reasons[@]}"}; do
-    reasons_json+="${reasons_json:+,}$(json_string "$reason")"
-  done
-
   local payload
-  payload=$(printf '{"machine_name":%s,"status":"%s","cpu_pct":%s,"mem_pct":%s,"disk_pct":%s,"disk_mount":%s,"reasons":[%s]}' \
-    "$(json_string "$machine_name")" "$status" "$cpu_pct" "$mem_pct" "$disk_pct" \
-    "$(json_string "$disk_mount")" "$reasons_json")
+  payload=$(printf '{"machine_name":%s,"cpu_pct":%s,"mem_pct":%s,"disk_pct":%s,"disk_mount":%s}' \
+    "$(json_string "$machine_name")" "$cpu_pct" "$mem_pct" "$disk_pct" "$(json_string "$disk_mount")")
 
   if ! curl -fsS --max-time 10 -X POST -H "Content-Type: application/json" \
+    -K <(printf 'header = "Authorization: Bearer %s"\n' "$HEALTH_REPORT_KEY") \
     --data "$payload" "$HEALTH_REPORT_URL" >/dev/null; then
     echo "Warning: could not send the health report to the dashboard." >&2
   fi
 }
 
 if [[ -n "${HEALTH_REPORT_URL:-}" ]]; then
-  report_to_dashboard
+  if [[ -n "${HEALTH_REPORT_KEY:-}" ]]; then
+    report_to_dashboard
+  else
+    echo "Warning: HEALTH_REPORT_KEY is not set; skipping the dashboard report." >&2
+  fi
 fi
 
 if [[ "$EXPLAIN" == true ]]; then

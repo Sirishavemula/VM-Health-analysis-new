@@ -1,51 +1,14 @@
-import { useEffect, useState } from 'react';
-import { fetchHealthChecks, HISTORY_RANGES, STALE_AFTER_MINUTES } from '../lib/healthData.js';
-import CurrentStatus from './CurrentStatus.jsx';
-import HistoryChart from './HistoryChart.jsx';
+import { useState } from 'react';
+import MachinesPanel from './MachinesPanel.jsx';
+import StatusView from './StatusView.jsx';
 
-const REFRESH_MS = 60 * 1000;
+const TABS = [
+  { key: 'status', label: 'Status' },
+  { key: 'machines', label: 'Machines' },
+];
 
 export default function Dashboard({ onSignOut, userEmail }) {
-  const [range, setRange] = useState('24h');
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedMachine, setSelectedMachine] = useState('');
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const data = await fetchHealthChecks(range);
-        if (!cancelled) {
-          setRows(data);
-          setError('');
-        }
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    const intervalId = setInterval(load, REFRESH_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(intervalId);
-    };
-  }, [range]);
-
-  const machines = [...new Set(rows.map((row) => row.machine_name))];
-  const activeMachine = machines.includes(selectedMachine) ? selectedMachine : machines[0] ?? null;
-  const machineRows = rows.filter((row) => row.machine_name === activeMachine);
-  const latest = machineRows.at(-1) ?? null;
-
-  const minutesSinceLatest = latest
-    ? (Date.now() - new Date(latest.checked_at).getTime()) / 60000
-    : null;
-  const isStale = minutesSinceLatest !== null && minutesSinceLatest > STALE_AFTER_MINUTES;
+  const [tab, setTab] = useState('status');
 
   return (
     <div className="dashboard">
@@ -59,56 +22,21 @@ export default function Dashboard({ onSignOut, userEmail }) {
         </button>
       </header>
 
-      <div className="toolbar">
-        <label>
-          Machine
-          <select
-            value={activeMachine ?? ''}
-            onChange={(e) => setSelectedMachine(e.target.value)}
-            disabled={machines.length === 0}
+      <nav className="tabs" aria-label="Dashboard sections">
+        {TABS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={`tab ${tab === item.key ? 'tab-active' : ''}`}
+            aria-current={tab === item.key ? 'page' : undefined}
+            onClick={() => setTab(item.key)}
           >
-            {machines.length === 0 && <option value="">No machines yet</option>}
-            {machines.map((name) => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Time range
-          <select value={range} onChange={(e) => setRange(e.target.value)}>
-            {Object.entries(HISTORY_RANGES).map(([key, option]) => (
-              <option key={key} value={key}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-      </div>
+            {item.label}
+          </button>
+        ))}
+      </nav>
 
-      {error && <p className="form-error" role="alert">{error}</p>}
-
-      {loading && rows.length === 0 && !error && <p className="muted">Loading health checks...</p>}
-
-      {!loading && !error && !latest && (
-        <section className="card empty-state">
-          <h2>No health reports yet</h2>
-          <p className="muted">
-            Run the health check on your machine with the dashboard address set, and its results will
-            appear here.
-          </p>
-        </section>
-      )}
-
-      {latest && (
-        <>
-          {isStale && (
-            <p className="stale-warning" role="status">
-              No report from {activeMachine} for about {Math.round(minutesSinceLatest)} minutes. The
-              machine may be offline or the health check may not be running.
-            </p>
-          )}
-          <CurrentStatus latest={latest} />
-          <HistoryChart rows={machineRows} />
-        </>
-      )}
+      {tab === 'status' ? <StatusView /> : <MachinesPanel />}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export async function fetchHealthChecks(rangeKey) {
     .limit(5000);
 
   if (error) {
-    throw new Error('Could not load health checks. Please try again.');
+    throw new Error('Cannot reach the monitoring backend right now. Check your connection and try again.');
   }
   if (!Array.isArray(data)) {
     throw new Error('Health checks returned an unexpected response.');
